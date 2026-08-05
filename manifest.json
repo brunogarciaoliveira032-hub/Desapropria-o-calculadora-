@@ -1,0 +1,16 @@
+{
+  "name": "Calculadora de Desapropriação — Duarte Advogados",
+  "short_name": "Desapropriação",
+  "description": "Apuração da diferença entre oferta administrativa e valor fixado em sentença, com correção monetária, juros, honorários e custas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#efe9dd",
+  "theme_color": "#1c2740",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

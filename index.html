@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de Desapropriação — Duarte Advogados Associados</title>
+
+<!-- PWA: instalação na tela inicial (Android e iOS) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c2740">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<!-- iOS/Safari: tela cheia ao abrir da tela inicial -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Desapropriação">
+<style>
+  :root{
+    --bg: #efe9dd;
+    --bg-soft: #f5f1e7;
+    --card: #f7f3e8;
+    --card-border: #ded4bc;
+    --gold: #a9812f;
+    --gold-strong: #8a6a22;
+    --navy: #1c2740;
+    --navy-soft: #2c3a58;
+    --text: #2c2a24;
+    --text-muted: #6b6558;
+    --input-bg: #ffffff;
+    --input-border: #cfc6ac;
+    --shadow: 0 8px 24px rgba(28,39,64,0.08);
+    --divider: #1c2740;
+    --toast-bg: #1c2740;
+    --toast-err: #8a3324;
+    --ok: #2e6b4f;
+    --alerta: #8a6d1d;
+    --erro: #8a3324;
+    --info: #5b6472;
+  }
+  html[data-theme="dark"]{
+    --bg: #14171f;
+    --bg-soft: #191d27;
+    --card: #1c202b;
+    --card-border: #333a4a;
+    --gold: #c9a24a;
+    --gold-strong: #d9b768;
+    --navy: #e8ebf2;
+    --navy-soft: #c7cee0;
+    --text: #e6e3d9;
+    --text-muted: #9a9587;
+    --input-bg: #12151d;
+    --input-border: #3a4155;
+    --shadow: 0 8px 28px rgba(0,0,0,0.45);
+    --divider: #c9a24a;
+    --toast-bg: #2c3a58;
+    --toast-err: #a5432c;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+    transition: background .25s ease, color .25s ease;
+  }
+
+  /* ---------- Cabeçalho / marca ---------- */
+  header.brand{
+    text-align:center;
+    padding: 32px 0 8px;
+    position:relative;
+  }
+  #themeToggle{
+    position:absolute;
+    top:20px; right:0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.8em;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    display:flex; align-items:center; gap:6px;
+  }
+  #themeToggle:hover{ border-color: var(--gold); }
+
+  .logo{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    font-size: 2.6em;
+    color: var(--navy);
+    letter-spacing: 2px;
+  }
+  .logo .divider-bar{
+    width:2px; height: 34px; background: var(--navy);
+    display:inline-block;
+  }
+  .logo span{ font-weight:400; }
+  .firm-name{
+    margin-top: 6px;
+    font-size: 1.05em;
+    letter-spacing: 3px;
+    color: var(--navy);
+  }
+  .firm-sub{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.68em;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .practice-tag{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-size: 0.78em;
+    margin-top: 26px;
+    font-weight: 600;
+  }
+  h1.page-title{
+    color: var(--navy);
+    font-size: 2.1em;
+    margin: 10px 0 6px;
+  }
+  p.lede{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    color: var(--text-muted);
+    font-size: 0.98em;
+    line-height: 1.6;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .hairline{
+    height: 2px;
+    background: var(--divider);
+    margin: 26px 0 30px;
+    opacity: .85;
+  }
+
+  /* ---------- Cards (antigos fieldsets) ---------- */
+  fieldset.card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-left: 4px solid var(--gold);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px 26px;
+    margin: 0 0 22px;
+  }
+  fieldset.card legend{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 0 4px;
+    color: var(--navy);
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  fieldset.card legend .art-badge{
+    font-family: Georgia, serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.85em;
+    white-space: nowrap;
+  }
+  fieldset.card .legend-rule{
+    border: none;
+    border-top: 1px solid var(--card-border);
+    margin: 4px 0 16px;
+  }
+
+  label{
+    display:block;
+    margin-top: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--navy-soft);
+  }
+  label input[type=checkbox]{ width:auto; margin-right:6px; vertical-align:middle; }
+  .opt-tag{ font-weight: 400; color: var(--text-muted); }
+  .req-tag{ color: var(--erro); font-weight: 800; margin-left: 3px; }
+
+  /* Avisos de validação (não bloqueiam o cálculo) — distintos dos erros
+     bloqueantes (.campo-erro / .msg-erro-campo), ver js/validacao.js.
+     A distinção NÃO depende só da cor (acessibilidade a daltonismo):
+     erro = borda sólida + ícone ✕; aviso = borda pontilhada + ícone ⚠. */
+  .campo-aviso{
+    border-color: var(--alerta) !important;
+    border-style: dashed !important;
+    box-shadow: 0 0 0 3px rgba(138,109,29,0.15);
+  }
+  .msg-aviso-campo{
+    display:block;
+    margin-top:4px;
+    color: var(--alerta);
+    font-size:0.8em;
+    font-weight:600;
+  }
+  .msg-aviso-campo::before{ content:"⚠ Aviso: "; font-weight:800; }
+  #avisos-formulario{
+    display:none;
+    margin: 20px 0;
+    padding: 14px 18px;
+    background: rgba(138,109,29,0.08);
+    border: 2px dashed var(--alerta);
+    border-radius: 6px;
+    color: var(--alerta);
+  }
+  #avisos-formulario h3{ margin:0 0 8px; font-size:1em; }
+  #avisos-formulario ul{ margin:0; padding-left:20px; }
+  #avisos-formulario li{ margin:2px 0; }
+
+  /* Validação em tempo real — campo preenchido sem erro/aviso pendente
+     (ver revalidarCampo em js/validacao.js). Verde, sem borda pontilhada
+     nem sólida grossa, para não competir visualmente com erro/aviso. */
+  .campo-valido{
+    border-color: var(--ok) !important;
+    box-shadow: 0 0 0 3px rgba(46,107,79,0.12);
+  }
+  .msg-sucesso-campo{
+    display:block;
+    margin-top:4px;
+    color: var(--ok);
+    font-size:0.8em;
+    font-weight:600;
+  }
+
+  input, select, textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding: 10px 12px;
+    margin-top: 5px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.95em;
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(169,129,47,0.18);
+  }
+  input::placeholder, textarea::placeholder{ color: var(--text-muted); opacity:.7; }
+
+  .row{ display:flex; gap: 16px; flex-wrap: wrap; }
+  .row > div{ flex:1; min-width: 200px; }
+
+  .faixa, .deposito, .levantamento{
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+  }
+  .faixa input, .deposito input, .levantamento input{ width:auto; flex:1; min-width:120px; margin-top:0; }
+
+  button{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    margin-top: 12px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold-strong);
+    font-size: 0.88em;
+    font-weight: 600;
+    letter-spacing: .3px;
+    transition: background .15s ease, color .15s ease;
+  }
+  button:hover{ background: var(--gold); color: #fff; }
+  html[data-theme="dark"] button:hover{ color:#14171f; }
+
+  .indice-botoes{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;
+  }
+  .btn-indice{
+    margin-top:0; padding:8px 14px; font-size:0.85em;
+  }
+  .btn-indice.ativo{
+    background: var(--gold); color:#fff;
+  }
+  html[data-theme="dark"] .btn-indice.ativo{ color:#14171f; }
+  .btn-indice[aria-busy="true"]{ opacity:.6; cursor:wait; }
+  #indiceUltimaAtualizacao{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+    font-size:0.82em; color:var(--text-muted); margin-top:6px; min-height:1.2em;
+  }
+  #indiceUltimaAtualizacao.erro{ color:#8a3324; }
+
+  .actions{
+    display:flex; gap:12px; flex-wrap:wrap;
+    margin: 30px 0 10px;
+  }
+  .actions button{
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+    padding: 12px 22px;
+  }
+  html[data-theme="dark"] .actions button{ color:#14171f; }
+  .actions button:hover{ background: var(--gold); border-color: var(--gold); color:#fff; }
+  #btnCalcular{ background: var(--gold); border-color: var(--gold); color:#fff; }
+  #btnCalcular:hover{ background: var(--gold-strong); border-color: var(--gold-strong); }
+
+  h2.section-title{
+    color: var(--navy);
+    margin-top: 40px;
+    border-bottom: 2px solid var(--divider);
+    padding-bottom: 8px;
+  }
+
+  #toast{
+    position:fixed; bottom:20px; right:20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: var(--toast-bg); color:#fff;
+    padding:12px 18px; border-radius:8px;
+    opacity:0; transition:opacity .3s; z-index:999;
+    box-shadow: var(--shadow);
+  }
+  #toast.show{opacity:1;}
+  #toast.err{background: var(--toast-err);}
+
+  .niv-erro{color: var(--erro); font-weight:bold;}
+  .niv-alerta{color: var(--alerta);}
+  .niv-info{color: var(--info);}
+  .niv-ok{color: var(--ok);}
+
+  /* Validação do formulário (js/validacao.js) */
+  .campo-erro{
+    border-color: var(--erro) !important;
+    border-style: solid !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px rgba(138,51,36,0.15);
+  }
+  .msg-erro-campo{
+    display:block;
+    margin-top:4px;
+    color: var(--erro);
+    font-size:0.8em;
+    font-weight:600;
+  }
+  .msg-erro-campo::before{ content:"✕ Erro: "; font-weight:800; }
+  #erros-formulario{
+    display:none;
+    margin: 20px 0;
+    padding: 14px 18px;
+    background: rgba(138,51,36,0.08);
+    border: 2px solid var(--erro);
+    border-radius: 6px;
+    color: var(--erro);
+  }
+  #erros-formulario h3{ margin:0 0 8px; font-size:1em; }
+  #erros-formulario ul{ margin:0; padding-left:20px; }
+  #erros-formulario li{ margin:2px 0; }
+
+  #painelAuditoria{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+  #painelAuditoria.destaque{outline:3px solid var(--erro);}
+
+  #resumoResultado, #tabelaMemoria{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  }
+  table{border-collapse:collapse; width:100%; font-size:0.85em;}
+  th, td{ padding:6px 8px; border-bottom:1px solid var(--card-border); text-align:left; }
+
+  /* ---------- Importação/leitura de PDF ---------- */
+  #zonaDropPdf{
+    border: 2px dashed var(--input-border);
+    border-radius: 8px;
+    padding: 26px 18px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  #zonaDropPdf:hover, #zonaDropPdf.arrastando{
+    border-color: var(--gold);
+    background: var(--bg-soft);
+  }
+  #zonaDropPdf strong{ color: var(--navy); display:block; margin-bottom:4px; }
+  #inputPdf{ display:none; }
+  .pdf-acoes{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 6px; }
+  #btnCancelarLeitura{
+    display:none;
+    border-color: var(--erro);
+    color: var(--erro);
+  }
+  #btnCancelarLeitura:hover{ background: var(--erro); color:#fff; }
+
+  #leitorProgressoWrap{
+    display:none;
+    margin-top: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  }
+  #leitorProgressoTrilha{
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    overflow: hidden;
+    height: 10px;
+  }
+  #leitorProgressoBarra{
+    height: 100%;
+    width: 0%;
+    background: var(--gold);
+    transition: width .2s ease;
+  }
+  #leitorProgressoTexto{
+    font-size: 0.82em;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  #avisoTruncamento{
+    display:none;
+    margin-top: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.85em;
+    color: var(--alerta);
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  #areaFallbackIA{
+    margin-top: 14px;
+  }
+  .aviso-ia{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 0 0 10px;
+  }
+
+  #historicoLeituraPdf{
+    margin-top: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.82em;
+    color: var(--text-muted);
+  }
+  #historicoLeituraPdf ul{ list-style:none; padding:0; margin:8px 0 0; }
+  #historicoLeituraPdf li{
+    display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    padding: 6px 0; border-bottom: 1px solid var(--card-border);
+  }
+
+  #leitorRelatorio, #tabelaConferencia{
+    display:none;
+    margin-top: 18px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 0.9em;
+  }
+  #leitorRelatorio.mostrar, #tabelaConferencia.mostrar{ display:block; }
+  #leitorRelatorio{
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    line-height: 1.6;
+  }
+
+  .badge-conf{
+    display:inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+  .badge-conf.alta{ background: rgba(46,107,79,0.15); color: var(--ok); }
+  .badge-conf.media{ background: rgba(138,109,29,0.15); color: var(--alerta); }
+  .badge-conf.baixa{ background: rgba(138,51,36,0.15); color: var(--erro); }
+
+  .celula-origem{ font-size: 0.85em; color: var(--text-muted); cursor: help; }
+  .icone-obs{ cursor: help; font-size: 0.9em; }
+
+  #tabelaConferencia input.valorConferencia,
+  #tabelaConferencia select.valorConferencia{
+    margin-top:0;
+  }
+
+  .campo-preenchido-pdf{
+    background: rgba(169,129,47,0.12) !important;
+    border-color: var(--gold) !important;
+  }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <button type="button" id="themeToggle" onclick="alternarTema()">
+    <span id="themeIcon">🌙</span> <span id="themeLabel">Tema escuro</span>
+  </button>
+  <div class="logo"><span>D</span><span class="divider-bar"></span><span>A</span></div>
+  <div class="firm-name">DUARTE ADVOGADOS</div>
+  <div class="firm-sub">ASSOCIADOS</div>
+  <div class="practice-tag">Direito Administrativo · Desapropriação e Indenizações</div>
+  <h1 class="page-title">Calculadora de Desapropriação</h1>
+  <p style="font-size:0.85em; color: var(--text-muted); margin-top:-6px;"><span class="req-tag" title="Campo obrigatório">*</span> Campo obrigatório para o cálculo.</p>
+  <p class="lede">Apuração da diferença entre a oferta administrativa e o valor fixado em sentença (ou título executivo), com correção monetária mês a mês, juros, honorários e custas.</p>
+</header>
+<div class="hairline"></div>
+
+<fieldset class="card">
+  <legend>📄 Importar dados por PDF <span class="opt-tag">(opcional)</span></legend>
+  <hr class="legend-rule">
+  <div id="zonaDropPdf" tabindex="0" role="button" aria-label="Anexar PDF do processo">
+    <strong>Solte aqui o(s) PDF(s) do processo</strong>
+    ou clique / toque para escolher o arquivo (aceita vários de uma vez)
+  </div>
+  <input type="file" id="inputPdf" accept="application/pdf,.pdf" multiple>
+  <div class="pdf-acoes">
+    <button type="button" id="btnAnexarPdf">Anexar PDF</button>
+    <button type="button" id="btnCancelarLeitura">Cancelar leitura</button>
+  </div>
+
+  <div id="leitorProgressoWrap">
+    <div id="leitorProgressoTrilha"><div id="leitorProgressoBarra"></div></div>
+    <div id="leitorProgressoTexto"></div>
+  </div>
+
+  <div id="avisoTruncamento"></div>
+  <div id="leitorRelatorio"></div>
+  <div id="tabelaConferencia"></div>
+  <div id="areaFallbackIA"></div>
+  <div id="historicoLeituraPdf"></div>
+</fieldset>
+
+<fieldset class="card">
+  <legend>🤖 Fallback por IA para campos não encontrados <span class="opt-tag">(opcional)</span></legend>
+  <hr class="legend-rule">
+  <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:0.85em;color:var(--text-muted);margin:0 0 10px;">
+    Quando a leitura por padrões não encontra um campo (ou encontra com baixa confiança), você pode pedir para a IA da Anthropic tentar completá-lo — só quando você clicar no botão que aparece na conferência, nunca automaticamente. Isso envia o trecho relevante do PDF (não o processo inteiro) para a API da Anthropic usando sua própria chave. A chave fica salva só neste navegador (localStorage), nunca é enviada a mais ninguém além da própria Anthropic.
+  </p>
+  <div class="row">
+    <label for="chaveApiIA">Chave de API da Anthropic</label>
+    <input type="password" id="chaveApiIA" placeholder="sk-ant-..." autocomplete="off">
+  </div>
+  <div class="pdf-acoes">
+    <button type="button" id="btnSalvarChaveIA">Salvar chave</button>
+    <button type="button" id="btnLimparChaveIA">Remover chave</button>
+  </div>
+  <div id="statusChaveIA" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:0.82em;color:var(--text-muted);margin-top:8px;"></div>
+</fieldset>
+
+<fieldset class="card">
+  <legend>🔎 Consulta automática de advogado pela OAB <span class="opt-tag">(opcional)</span></legend>
+  <hr class="legend-rule">
+  <p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:0.85em;color:var(--text-muted);margin:0 0 10px;">
+    Com um token cadastrado, o campo "Advogado(a)" é preenchido automaticamente ao sair do campo OAB (ex.: "OAB/SP 123.456"). Sem token salvo, o preenchimento continua manual. O token fica salvo só neste navegador (localStorage) e é enviado apenas ao provedor de consulta configurado — hoje, a API da Exato Digital (api.exato.digital); ela é paga e cobra por consulta, então confirme o plano deles antes de usar em produção. Se você usa outro provedor, me avise para eu trocar o endpoint em <code>js/consultaOab.js</code>.
+  </p>
+  <div class="row">
+    <label for="chaveApiOAB">Token da API de consulta OAB</label>
+    <input type="password" id="chaveApiOAB" placeholder="token..." autocomplete="off">
+  </div>
+  <div class="pdf-acoes">
+    <button type="button" id="btnSalvarChaveOAB">Salvar token</button>
+    <button type="button" id="btnLimparChaveOAB">Remover token</button>
+  </div>
+  <div id="statusChaveOAB" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:0.82em;color:var(--text-muted);margin-top:8px;"></div>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 1º</span> Identificação do Processo</legend>
+  <hr class="legend-rule">
+  <div class="row">
+    <div><label>Escritório <span class="opt-tag">(opcional)</span> <input id="escritorioNome" placeholder="Nome do escritório"></label></div>
+    <div><label>OAB <span class="opt-tag">(opcional)</span> <input id="advogadoOAB" placeholder="OAB/SP 123.456"></label></div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Advogado(a) <span class="opt-tag">(opcional)</span>
+        <input id="advogadoNome" placeholder="Preenchido automaticamente pela OAB, ou digite manualmente">
+      </label>
+      <div id="statusConsultaOab" class="opt-tag" style="display:block;margin-top:4px;"></div>
+    </div>
+    <div><label>Tipo de ação <span class="opt-tag">(opcional)</span>
+      <select id="tipoAcao">
+        <option value="desapropriacao">Direta</option>
+        <option value="indenizacao">Indireta</option>
+      </select>
+    </label></div>
+  </div>
+  <div class="row">
+    <div><label>Nº do processo <span class="opt-tag">(opcional)</span> <input id="numeroProcesso" placeholder="0001234-56.2024.8.26.0100"></label></div>
+    <div><label>Autor (expropriante) <span class="opt-tag">(opcional)</span> <input id="expropriante"></label></div>
+  </div>
+  <div class="row">
+    <div><label>Réu (expropriado) <span class="opt-tag">(opcional)</span> <input id="expropriado"></label></div>
+    <div><label>Benfeitorias <span class="opt-tag">(opcional)</span> <input id="valorBenfeitorias" class="money" placeholder="0,00"></label></div>
+  </div>
+  <div class="row">
+    <div><label>Comarca/Vara <span class="opt-tag">(opcional)</span> <input id="comarca"></label></div>
+    <div><label>URL de validação <span class="opt-tag">(opcional)</span> <input id="urlValidacao"></label></div>
+  </div>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 2º</span> Valores e Datas</legend>
+  <hr class="legend-rule">
+  <div class="row">
+    <div><label>Valor da oferta <input id="valorOferta" class="money" placeholder="0,00"></label></div>
+    <div><label>Valor da sentença <span class="req-tag" title="Campo obrigatório">*</span> <input id="valorSentenca" class="money" placeholder="0,00"></label></div>
+  </div>
+  <div class="row">
+    <div><label>Data da oferta <span id="reqOferta" class="req-tag" title="Campo obrigatório para este tipo de ação" style="display:none">*</span> <input type="date" id="dataOferta"></label></div>
+    <div><label>Data da sentença <span class="req-tag" title="Campo obrigatório">*</span> <input type="date" id="dataSentenca"></label></div>
+    <div><label>Data da imissão na posse <input type="date" id="dataImissao"></label></div>
+  </div>
+  <div class="row">
+    <div><label>Data-base <span class="req-tag" title="Campo obrigatório">*</span> <input type="date" id="dataBase"></label></div>
+    <div><label>Data de pagamento <span class="opt-tag">(opcional)</span> <input type="date" id="dataPagamento"></label></div>
+  </div>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 3º</span> Correção Monetária</legend>
+  <hr class="legend-rule">
+  <div class="row">
+    <div>
+      <label>Índice</label>
+      <div class="indice-botoes" role="group" aria-label="Atalhos de índice">
+        <button type="button" class="btn-indice" data-indice="ipcae">IPCA-E</button>
+        <button type="button" class="btn-indice" data-indice="selic">Selic</button>
+        <button type="button" class="btn-indice" data-indice="ipca">IPCA</button>
+      </div>
+      <div id="indiceUltimaAtualizacao"></div>
+      <label style="margin-top:8px">Outras opções (INPC, taxa personalizada, conforme sentença)
+        <select id="indice">
+          <option value="manual" selected>Taxa personalizada (offline)</option>
+          <option value="selic">Selic</option>
+          <option value="ipca">IPCA</option>
+          <option value="ipcae">IPCA-E</option>
+          <option value="inpc">INPC</option>
+          <option value="sentenca">Conforme sentença (transcrever trecho abaixo)</option>
+        </select>
+      </label>
+    </div>
+    <div><label>Taxa manual (% a.m.) <input type="number" step="0.01" id="taxaManual" placeholder="0,00"></label></div>
+    <div><label>Critério de contagem
+      <select id="criterio">
+        <option value="pro_rata_die">Pro rata die</option>
+        <option value="mes_comercial">Mês comercial (30/360)</option>
+      </select>
+    </label></div>
+  </div>
+  <label><input type="checkbox" id="incluirMesInicial" style="width:auto"> Incluir mês inicial</label>
+  <label><input type="checkbox" id="aplicarEC113" style="width:auto"> Trocar para Selic a partir de 12/2021 (EC 113/2021)</label>
+  <label>Trecho da sentença sobre o índice (se "conforme sentença") <textarea id="trechoSentencaIndice" rows="2"></textarea></label>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 4º</span> Juros Compensatórios</legend>
+  <hr class="legend-rule">
+  <label><input type="checkbox" id="aplicarJurosComp" style="width:auto"> Aplicar juros compensatórios <span class="opt-tag">(deixe desmarcado se não for usar este item)</span></label>
+  <div class="faixa">
+    <input type="date" id="faixaCompInicio" title="Início">
+    <input type="date" id="faixaCompFim" title="Fim">
+    <input type="number" step="0.01" id="faixaCompTaxa" placeholder="% a.a." style="width:70px">
+  </div>
+  <label><input type="checkbox" id="permitirFallback12" style="width:auto"> Permitir taxa padrão de 12% a.a. quando nenhuma faixa for configurada (desmarcado por padrão — recomendado para uso profissional: configure faixas explícitas em vez de depender do valor padrão)</label>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 5º</span> Juros Moratórios</legend>
+  <hr class="legend-rule">
+  <div class="faixa">
+    <input type="date" id="faixaMoraInicio" title="Início">
+    <input type="date" id="faixaMoraFim" title="Fim">
+    <input type="number" step="0.01" id="faixaMoraTaxa" placeholder="% a.a." style="width:70px">
+  </div>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 6º</span> Depósito Judicial</legend>
+  <hr class="legend-rule">
+  <label><input type="checkbox" id="existeDeposito" style="width:auto"> Houve depósito judicial</label>
+  <label style="margin-top:16px">Depósito(s) — inicial e complementar(es), em datas diferentes se houver</label>
+  <div id="depositos"></div>
+  <button type="button" onclick="adicionarDeposito()">+ depósito</button>
+  <label style="margin-top:16px">Levantamento(s) parcial(is)</label>
+  <div id="levantamentos"></div>
+  <button type="button" onclick="adicionarLevantamento()">+ levantamento</button>
+</fieldset>
+
+<fieldset class="card">
+  <legend><span class="art-badge">Art. 7º</span> Honorários e Custas</legend>
+  <hr class="legend-rule">
+  <div class="row">
+    <div><label>% Honorários sucumbenciais <input type="number" step="0.1" id="percentualHonor" placeholder="0,0"></label></div>
+    <div><label>Custas processuais <input id="custas" class="money" placeholder="0,00"></label></div>
+    <div><label>Honorários contratuais (informativo) <input id="honorContratualVal" class="money" placeholder="0,00"></label></div>
+  </div>
+  <div class="row">
+    <div><label>Limite % honorários <span class="opt-tag">(opcional — só gera alerta se preenchido)</span> <input type="number" step="0.1" id="limiteHonorPercentual" value=""></label></div>
+  </div>
+</fieldset>
+
+<div class="actions">
+  <button id="btnCalcular">Calcular</button>
+  <button id="btnPdf">Gerar PDF</button>
+  <button id="btnExcel">Exportar Excel</button>
+</div>
+
+<h2 class="section-title">Resultado</h2>
+<div id="resumoResultado"></div>
+<div id="tabelaMemoria"></div>
+<div id="painelAuditoria"></div>
+
+<div id="toast"></div>
+
+<script>
+  function alternarTema(){
+    const html = document.documentElement;
+    const atual = html.getAttribute('data-theme');
+    const novo = atual === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', novo);
+    document.getElementById('themeIcon').textContent = novo === 'dark' ? '☀️' : '🌙';
+    document.getElementById('themeLabel').textContent = novo === 'dark' ? 'Tema claro' : 'Tema escuro';
+    try{ localStorage.setItem('da_tema', novo); }catch(e){}
+  }
+  (function(){
+    try{
+      const salvo = localStorage.getItem('da_tema');
+      if(salvo === 'dark'){
+        document.documentElement.setAttribute('data-theme','dark');
+      }
+    }catch(e){}
+  })();
+  document.addEventListener('DOMContentLoaded', function(){
+    if(document.documentElement.getAttribute('data-theme') === 'dark'){
+      document.getElementById('themeIcon').textContent = '☀️';
+      document.getElementById('themeLabel').textContent = 'Tema claro';
+    }
+  });
+
+  // Registra o service worker (uso offline + instalação como app)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+
+<!-- Bibliotecas de terceiro (precisam de internet; usadas só por PDF/Excel/leitura) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+
+<!-- As 8 partes originais do zip, na ordem de dependência já documentada nos cabeçalhos -->
+<script src="js/util.js"></script>
+<script src="js/motor.js"></script>
+<script src="js/modulos/direta.js"></script>
+<script src="js/modulos/indireta.js"></script>
+<script src="js/indices.js"></script>
+<script src="js/validacao.js"></script>
+<script src="js/carregador.js"></script>
+<script src="js/consultaOab.js"></script>
+
+<!-- Peças que faltavam, escritas agora só para o teste -->
+<script src="js/completar.js"></script>
+
+<!-- Leitura de PDF, classificação/extração, inteligência jurídica e painel de
+     conferência/preenchimento — leitorPdf.js precisa de pdfjsLib/Tesseract
+     (acima), util.js ($, toast) e normalizadorTexto.js (normalizarTextoExtraido);
+     painelConferencia.js orquestra tudo e precisa vir por último deste grupo. -->
+<script src="js/normalizadorTexto.js"></script>
+<script src="js/leitorPdf.js"></script>
+<script src="js/classificadorExtrator.js"></script>
+<script src="js/extratorCandidatos.js"></script>
+<script src="js/inteligenciaJuridica.js"></script>
+<script src="js/iaFallback.js"></script>
+<script src="js/painelConferencia.js"></script>
+
+<!-- Exportações (dependem de tudo acima) -->
+<script src="js/exportarPDF.js"></script>
+<script src="js/exportarExcel.js"></script>
+</body>
+</html>
